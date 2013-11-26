@@ -147,7 +147,8 @@ if __name__ == '__main__':
     # Special subparser that print help of action
     sub = subparsers.add_parser("help", help="Print <command> help",
                                 add_help=False)
-    sub.add_argument("command", action=print_help(parser))
+    sub.add_argument("command", action=print_help(parser),
+                     nargs='?', default=None)
 
     # All other actions.
     sub = subparsers.add_parser("send", help="Send SMS",
