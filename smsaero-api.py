@@ -145,7 +145,8 @@ if __name__ == '__main__':
                                       )
 
     # Special subparser that print help of action
-    sub = subparsers.add_parser("help", help="Print <command> help")
+    sub = subparsers.add_parser("help", help="Print <command> help",
+                                add_help=False)
     sub.add_argument("command", action=print_help(parser))
 
     # All other actions.
