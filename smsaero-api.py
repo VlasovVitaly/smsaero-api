@@ -50,6 +50,43 @@ class smsaeroAPI(object):
             raise ValueError("Action is not set")
         self._act_build_params(args)
 
+    def _limit_send_text(limit):
+        in_ascii = False
+        if limit <= 0:
+            return
+
+        try:
+            self.text.encode('ascii')
+        # Message has unicode chars
+        except UnicodeDecodeError:
+            max_len = 70
+            seg_len = 70 - 3
+            if getattr(self.text, 'decode', False):
+                msg_len = len(self.text.decode('utf-8'))
+            else:
+                msg_len = len(self.text)
+        # All characters of message in ascii
+        else: 
+            in_ascii = True
+            max_len = 160
+            seg_len = 160 - 7
+            msg_len = len(self.text)
+        finally:
+            full_segments, text = divmod(max_len, seg_len)
+
+        # Message fit in limit
+        if full_segments < limit:
+            return
+        if full_segments == limit and text == 0:
+            return
+
+        # Truncate message
+        if in_ascii:
+            self.text = self.text[0:limit * seg_len]
+        else:
+            self.text = unicode(self.text, 'utf-8')[0:limit * seg_len]
+
+        return
     def _act_build_params(self, params):
         q = dict()
         # Check required params
@@ -65,6 +102,10 @@ class smsaeroAPI(object):
             for field in check["opt"]:
                 if params.get(field) is None: continue
                 q[field] = params[field]
+
+        # Check limit of messages.
+        if self.action == 'send' and params['limit'] is not None:
+            self._limit_send_text(params['limit'])
 
         # Build params to url
         self.querry = urlencode(q)
@@ -171,6 +212,14 @@ if __name__ == '__main__':
     sub.add_argument("-d", "--date",
                      required=False,
                      help="Date of sending"
+                    )
+    sub.add_argument("-n" "--send-limit",
+                     type=int,
+                     required=False,
+                     dest="limit",
+                     metavar="NUM",
+                     help="Setup limit of outgoing sms when text too large." \
+                          "Text of message will be truncated"
                     )
     sub.add_argument("text",
                      metavar="MESSAGE",
