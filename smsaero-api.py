@@ -168,7 +168,7 @@ if __name__ == '__main__':
                      dest="from2",
                      help="Sender name for Megafon"
                     )
-    sub.add_argument("-d", "--data",
+    sub.add_argument("-d", "--date",
                      required=False,
                      help="Date of sending"
                     )
