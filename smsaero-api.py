@@ -172,6 +172,14 @@ if __name__ == '__main__':
                      required=False,
                      help="Date of sending"
                     )
+    sub.add_argument("-n" "--send-limit",
+                     type=int,
+                     required=False,
+                     dest="limit",
+                     metavar="NUM",
+                     help="Setup limit of outgoing sms when text too large." \
+                          "Text of message will be truncated"
+                    )
     sub.add_argument("text",
                      metavar="MESSAGE",
                      help="Text of message"
