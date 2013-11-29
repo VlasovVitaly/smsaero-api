@@ -50,6 +50,9 @@ class smsaeroAPI(object):
             raise ValueError("Action is not set")
         self._act_build_params(args)
 
+    def _limit_send_text(limit):
+        pass
+
     def _act_build_params(self, params):
         q = dict()
         # Check required params
@@ -65,6 +68,10 @@ class smsaeroAPI(object):
             for field in check["opt"]:
                 if params.get(field) is None: continue
                 q[field] = params[field]
+
+        # Check limit of messages.
+        if params['limit'] is not None:
+            self._limit_send_text(params['limit'])
 
         # Build params to url
         self.querry = urlencode(q)
