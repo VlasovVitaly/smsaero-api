@@ -50,7 +50,7 @@ class smsaeroAPI(object):
             raise ValueError("Action is not set")
         self._act_build_params(args)
 
-    def _limit_send_text(limit):
+    def _limit_send_text(self, limit):
         in_ascii = False
         if limit <= 0:
             return
