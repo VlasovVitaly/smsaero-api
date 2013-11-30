@@ -59,7 +59,7 @@ class smsaeroAPI(object):
         try:
             send_message.encode('ascii')
         # Message has unicode chars
-        except UnicodeDecodeError:
+        except (UnicodeEncodeError, UnicodeDecodeError):
             max_len = 70
             seg_len = 70 - 3
             if getattr(send_message, 'decode', False):
@@ -71,7 +71,7 @@ class smsaeroAPI(object):
             in_ascii = True
             max_len = 160
             seg_len = 160 - 7
-            msg_len = len(self.text)
+            msg_len = len(send_message)
 
         full_segments, text = divmod(msg_len, seg_len)
 
@@ -80,13 +80,16 @@ class smsaeroAPI(object):
             return
         if full_segments == limit and text == 0:
             return
+        if limit == 1 and msg_len <= max_len:
+            return
 
         # Truncate message
-        if in_ascii:
-            self.q['text'] = send_message[0:limit * seg_len]
+        if not in_ascii and getattr(send_message, 'decode', False):
+            temp  = send_message.decode('utf-8')[:limit * seg_len]
+            self.q['text'] = temp.encode('utf-8')
+            del temp
         else:
-            self.q['text'] = send_message[0:limit * seg_len]
-        return
+            self.q['text'] = send_message[:limit * seg_len]
 
     def _act_build_params(self, params):
         q = dict()
