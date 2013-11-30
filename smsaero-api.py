@@ -166,13 +166,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="smsaero-api",
              description="Command line interface for SMS Aero service")
 
-# Not used for now
-#    parser.add_argument("-l", "--log",
-#                        default="-",
-#                        metavar="FILE",
-#                        type=argparse.FileType('w'),
-#                        help="Write all messages to FILE"
-#                        
     default_args = argparse.ArgumentParser(add_help=False)
     default_args.add_argument("-u", "--username",
                               dest="user",
