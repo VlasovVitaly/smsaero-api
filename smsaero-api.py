@@ -51,28 +51,29 @@ class smsaeroAPI(object):
         self._act_build_params(args)
 
     def _limit_send_text(self, limit):
+        send_message = self.q['text']
         in_ascii = False
         if limit <= 0:
             return
 
         try:
-            self.text.encode('ascii')
+            send_message.encode('ascii')
         # Message has unicode chars
         except UnicodeDecodeError:
             max_len = 70
             seg_len = 70 - 3
-            if getattr(self.text, 'decode', False):
-                msg_len = len(self.text.decode('utf-8'))
+            if getattr(send_message, 'decode', False):
+                msg_len = len(send_message.decode('utf-8'))
             else:
-                msg_len = len(self.text)
+                msg_len = len(send_message)
         # All characters of message in ascii
         else: 
             in_ascii = True
             max_len = 160
             seg_len = 160 - 7
             msg_len = len(self.text)
-        finally:
-            full_segments, text = divmod(max_len, seg_len)
+
+        full_segments, text = divmod(msg_len, seg_len)
 
         # Message fit in limit
         if full_segments < limit:
@@ -82,11 +83,11 @@ class smsaeroAPI(object):
 
         # Truncate message
         if in_ascii:
-            self.text = self.text[0:limit * seg_len]
+            self.q['text'] = send_message[0:limit * seg_len]
         else:
-            self.text = unicode(self.text, 'utf-8')[0:limit * seg_len]
-
+            self.q['text'] = send_message[0:limit * seg_len]
         return
+
     def _act_build_params(self, params):
         q = dict()
         # Check required params
@@ -103,13 +104,14 @@ class smsaeroAPI(object):
                 if params.get(field) is None: continue
                 q[field] = params[field]
 
+        self.q = q
         # Check limit of messages.
         if self.action == 'send' and params['limit'] is not None:
             self._limit_send_text(params['limit'])
 
         # Build params to url
-        self.querry = urlencode(q)
-        del q, params
+        self.querry = urlencode(self.q)
+        del q, params, self.q
 
     def _build_url(self):
         url = urlparse("{0}{1}/?{2}".format(BASE_URL, self.action, self.querry))
